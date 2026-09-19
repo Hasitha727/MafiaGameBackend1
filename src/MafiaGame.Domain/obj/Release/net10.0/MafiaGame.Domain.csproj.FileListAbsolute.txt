@@ -1,0 +1,11 @@
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\bin\Release\net10.0\MafiaGame.Domain.deps.json
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\bin\Release\net10.0\MafiaGame.Domain.dll
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\bin\Release\net10.0\MafiaGame.Domain.pdb
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.AssemblyInfoInputs.cache
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.AssemblyInfo.cs
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.csproj.CoreCompileInputs.cache
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.dll
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\refint\MafiaGame.Domain.dll
+c:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\MafiaGame.Domain.pdb
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Domain\obj\Release\net10.0\ref\MafiaGame.Domain.dll

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MafiaGame.API/MafiaGame.API.csproj" />
+    <Project Path="src/MafiaGame.Application/MafiaGame.Application.csproj" />
+    <Project Path="src/MafiaGame.Domain/MafiaGame.Domain.csproj" />
+    <Project Path="src/MafiaGame.Infrastructure/MafiaGame.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MafiaGame.Tests/MafiaGame.Tests.csproj" />
+  </Folder>
+</Solution>

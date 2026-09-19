@@ -1,0 +1,15 @@
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\bin\Debug\net10.0\MafiaGame.Application.deps.json
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\bin\Debug\net10.0\MafiaGame.Application.dll
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\bin\Debug\net10.0\MafiaGame.Application.pdb
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\bin\Debug\net10.0\MafiaGame.Domain.dll
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\bin\Debug\net10.0\MafiaGame.Domain.pdb
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.csproj.AssemblyReference.cache
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.AssemblyInfoInputs.cache
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.AssemblyInfo.cs
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.csproj.CoreCompileInputs.cache
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGam.67477BD0.Up2Date
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.dll
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\refint\MafiaGame.Application.dll
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\MafiaGame.Application.pdb
+C:\Users\User\.gemini\antigravity-ide\scratch\MafiaGameBackend\src\MafiaGame.Application\obj\Debug\net10.0\ref\MafiaGame.Application.dll

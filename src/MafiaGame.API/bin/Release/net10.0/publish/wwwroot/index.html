@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAFIA - ASP.NET Core & SignalR Flagship Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0A0E17;
+            --bg-card: rgba(19, 26, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.1);
+            --neon-cyan: #00F0FF;
+            --neon-purple: #B026FF;
+            --neon-amber: #FFB300;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-dark); color: #F1F5F9; min-height: 100vh; padding: 20px; display: flex; justify-content: center; }
+
+        .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+
+        header { text-align: center; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(10px); }
+        h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; background: linear-gradient(135deg, #FFF, var(--neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+
+        input { width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: #FFF; outline: none; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #2563EB, #7C3AED); border: none; border-radius: 8px; color: #FFF; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+
+        .vote-trail { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 10px; padding: 12px; max-height: 150px; overflow-y: auto; font-size: 0.9rem; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; background: rgba(0, 240, 255, 0.15); color: var(--neon-cyan); font-weight: 700; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { color: #94A3B8; text-transform: uppercase; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🕵️ MAFIA GAME BACKEND ENGINE</h1>
+            <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 4px;">ASP.NET Core 10 Web API • SignalR Real-Time Hub • EF Core Clean Architecture</p>
+        </header>
+
+        <!-- Auth Section -->
+        <div id="auth-section" class="card">
+            <h3 style="font-family: 'Outfit'; margin-bottom: 12px;">JWT Authentication</h3>
+            <div class="grid">
+                <div>
+                    <h4>Register</h4>
+                    <input type="text" id="reg-username" placeholder="Username">
+                    <input type="email" id="reg-email" placeholder="Email">
+                    <input type="password" id="reg-password" placeholder="Password">
+                    <button onclick="register()">Register Account</button>
+                </div>
+                <div>
+                    <h4>Login</h4>
+                    <input type="text" id="login-user" placeholder="Username or Email">
+                    <input type="password" id="login-pass" placeholder="Password">
+                    <button style="background: linear-gradient(135deg, #059669, #10B981);" onclick="login()">Login & Obtain JWT</button>
+                </div>
+            </div>
+            <div id="auth-status" style="margin-top: 12px; font-weight: 600;"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="card" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    Logged in as: <strong id="user-display" style="color: var(--neon-cyan);"></strong>
+                </div>
+                <span class="badge" id="signalr-status">Disconnected</span>
+            </div>
+
+            <div class="grid">
+                <!-- Room Operations -->
+                <div>
+                    <h4>Create / Join Room</h4>
+                    <input type="text" id="room-code-input" placeholder="Room Code (To Join)" style="text-transform: uppercase;">
+                    <button onclick="createRoom()">Create Room</button>
+                    <button style="background: linear-gradient(135deg, #D97706, #F59E0B); margin-top: 8px;" onclick="joinRoom()">Join SignalR Hub Group</button>
+                </div>
+
+                <!-- SignalR Vote Trail Stream -->
+                <div>
+                    <h4>Real-Time Vote Trail Stream (SignalR)</h4>
+                    <div id="vote-trail-box" class="vote-trail" style="margin-top: 8px;">
+                        <div style="color: #64748B;">Waiting for real-time SignalR vote broadcasts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-family: 'Outfit';">🏆 Global Portfolio Leaderboard</h3>
+                <button style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="fetchLeaderboard()">Refresh</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Games</th>
+                        <th>Won</th>
+                        <th>Win Rate</th>
+                        <th>Reliability</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Dynamic Leaderboard -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let jwtToken = localStorage.getItem('jwt_token') || '';
+        let currentUser = null;
+        let connection = null;
+
+        if (jwtToken) {
+            initSession();
+        }
+
+        async function register() {
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await res.json();
+            if (data.token) {
+                jwtToken = data.token;
+                localStorage.setItem('jwt_token', jwtToken);
+                initSession();
+            } else {
+                alert(data.error || 'Registration failed.');
+            }
+        }
+
+        async function login() {
+            const usernameOrEmail = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value.trim();
+
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usernameOrEmail, password })
+            });
+            const data = await res.json();
+            if (data.token) {
+                jwtToken = data.token;
+                localStorage.setItem('jwt_token', jwtToken);
+                initSession();
+            } else {
+                alert(data.error || 'Login failed.');
+            }
+        }
+
+        function initSession() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            
+            // Connect SignalR Hub with JWT Auth Query string
+            connectSignalR();
+            fetchLeaderboard();
+        }
+
+        function connectSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/game', { accessTokenFactory: () => jwtToken })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('ReceiveVoteTrail', (voterId, voterName, targetId, targetName, count) => {
+                const box = document.getElementById('vote-trail-box');
+                box.innerHTML += `<div>🗳️ <strong>${voterName}</strong> cast vote for <strong>${targetName}</strong></div>`;
+                box.scrollTop = box.scrollHeight;
+            });
+
+            connection.on('ReceiveGameAnnouncement', (title, message, phase) => {
+                const box = document.getElementById('vote-trail-box');
+                box.innerHTML += `<div style="color: var(--neon-cyan);">📢 [${title}]: ${message}</div>`;
+                box.scrollTop = box.scrollHeight;
+            });
+
+            connection.start().then(() => {
+                document.getElementById('signalr-status').innerText = 'SignalR Connected ✅';
+                document.getElementById('signalr-status').style.background = 'rgba(0, 255, 157, 0.2)';
+                document.getElementById('signalr-status').style.color = '#00FF9D';
+            }).catch(err => console.error('SignalR Error:', err));
+        }
+
+        async function createRoom() {
+            const res = await fetch('/api/room/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + jwtToken
+                },
+                body: JSON.stringify({ modifiers: 0 })
+            });
+            const data = await res.json();
+            if (data.room_code) {
+                document.getElementById('room-code-input').value = data.room_code;
+                alert('Room Created! Code: ' + data.room_code);
+                joinRoom();
+            }
+        }
+
+        async function joinRoom() {
+            const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+            if (!code || !connection) return;
+            await connection.invoke('JoinRoomGroup', code);
+            alert('Joined SignalR Group for Room: ' + code);
+        }
+
+        async function fetchLeaderboard() {
+            const res = await fetch('/api/leaderboard');
+            const data = await res.json();
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML = data.map(s => `
+                <tr>
+                    <td><strong>${s.username}</strong></td>
+                    <td>${s.gamesPlayed}</td>
+                    <td>${s.gamesWon}</td>
+                    <td><span class="badge">${s.winRate}%</span></td>
+                    <td>${s.reliabilityScore}%</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
