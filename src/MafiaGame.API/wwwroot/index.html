@@ -68,34 +68,37 @@
             <h3 style="font-family: 'Outfit'; margin-bottom: 12px;">Player Account</h3>
             <div class="grid">
                 <div>
-                    <h4>Register</h4>
-                    <input type="text" id="reg-username" placeholder="Username">
-                    <input type="email" id="reg-email" placeholder="Email">
+                    <h4>Register New Player</h4>
+                    <input type="text" id="reg-username" placeholder="Username (e.g. Player1)">
+                    <input type="email" id="reg-email" placeholder="Email (e.g. p1@gmail.com)">
                     <input type="password" id="reg-password" placeholder="Password">
                     <button onclick="register()">Register Account</button>
                 </div>
                 <div>
-                    <h4>Login</h4>
+                    <h4>Existing Player Login</h4>
                     <input type="text" id="login-user" placeholder="Username or Email">
                     <input type="password" id="login-pass" placeholder="Password">
                     <button class="btn-green" onclick="login()">Login & Start Playing</button>
                 </div>
             </div>
-            <div id="auth-status" style="margin-top: 12px; font-weight: 600;"></div>
+            <div id="auth-status" style="margin-top: 12px; color: var(--neon-red); font-weight: 600;"></div>
         </div>
 
         <!-- Dashboard / Room Selection Section -->
         <div id="dashboard-section" class="card" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>Logged in as: <strong id="user-display" style="color: var(--neon-cyan);"></strong></div>
-                <span class="badge" id="signalr-status">Disconnected</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    Logged in as: <strong id="user-display" style="color: var(--neon-cyan);">Player</strong>
+                    <button style="width: auto; padding: 4px 10px; font-size: 0.75rem; display: inline-block; margin-left: 8px; background: rgba(255,255,255,0.1);" onclick="logout()">Logout</button>
+                </div>
+                <span class="badge" id="signalr-status">Connecting...</span>
             </div>
 
             <div class="grid">
                 <div>
                     <h4>Create / Join Room</h4>
                     <input type="text" id="room-code-input" placeholder="Enter 6-digit Room Code" style="text-transform: uppercase;">
-                    <button onclick="createRoom()">Create New Room</button>
+                    <button id="btn-create-room" onclick="createRoom()">Create New Room</button>
                     <button class="btn-amber" style="margin-top: 8px;" onclick="joinRoom()">Join Existing Room</button>
                 </div>
                 <div>
@@ -116,6 +119,7 @@
                 <div>
                     <span style="font-size: 1.2rem; font-family: 'Outfit'; font-weight: 800;">ROOM: <span id="current-room-code" style="color: var(--neon-cyan);">------</span></span>
                     <button style="width: auto; padding: 4px 10px; font-size: 0.75rem; display: inline-block; margin-left: 8px;" onclick="copyRoomCode()">Copy Code</button>
+                    <button style="width: auto; padding: 4px 10px; font-size: 0.75rem; display: inline-block; margin-left: 4px; background: rgba(255,255,255,0.1);" onclick="leaveRoom()">Leave Room</button>
                 </div>
                 <div>
                     <span class="badge" id="game-phase-badge">Phase: Lobby</span>
@@ -181,12 +185,25 @@
         let jwtToken = localStorage.getItem('jwt_token') || '';
         let currentUser = localStorage.getItem('current_username') || '';
         let activeRoomCode = '';
-        let isHost = false;
         let connection = null;
 
-        if (jwtToken) {
+        if (jwtToken && currentUser) {
             initSession();
         } else {
+            logout();
+        }
+
+        function logout() {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('current_username');
+            jwtToken = '';
+            currentUser = '';
+            if (connection) {
+                try { connection.stop(); } catch(e){}
+            }
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('gameplay-section').style.display = 'none';
             fetchLeaderboard();
         }
 
@@ -195,20 +212,29 @@
             const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value.trim();
 
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
-            });
-            const data = await res.json();
-            if (data.token) {
-                jwtToken = data.token;
-                currentUser = data.username || username;
-                localStorage.setItem('jwt_token', jwtToken);
-                localStorage.setItem('current_username', currentUser);
-                initSession();
-            } else {
-                alert(data.error || 'Registration failed.');
+            if (!username || !email || !password) {
+                alert('Please enter Username, Email, and Password.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.token) {
+                    jwtToken = data.token;
+                    currentUser = data.username || username;
+                    localStorage.setItem('jwt_token', jwtToken);
+                    localStorage.setItem('current_username', currentUser);
+                    initSession();
+                } else {
+                    alert(data.error || 'Registration failed.');
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
             }
         }
 
@@ -216,26 +242,36 @@
             const usernameOrEmail = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value.trim();
 
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usernameOrEmail, password })
-            });
-            const data = await res.json();
-            if (data.token) {
-                jwtToken = data.token;
-                currentUser = data.username || usernameOrEmail;
-                localStorage.setItem('jwt_token', jwtToken);
-                localStorage.setItem('current_username', currentUser);
-                initSession();
-            } else {
-                alert(data.error || 'Login failed.');
+            if (!usernameOrEmail || !password) {
+                alert('Please enter Username/Email and Password.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usernameOrEmail, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.token) {
+                    jwtToken = data.token;
+                    currentUser = data.username || usernameOrEmail;
+                    localStorage.setItem('jwt_token', jwtToken);
+                    localStorage.setItem('current_username', currentUser);
+                    initSession();
+                } else {
+                    alert(data.error || 'Login failed. Invalid credentials.');
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
             }
         }
 
         function initSession() {
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('gameplay-section').style.display = 'none';
             document.getElementById('user-display').innerText = currentUser;
             
             connectSignalR();
@@ -243,6 +279,8 @@
         }
 
         function connectSignalR() {
+            if (connection) return;
+
             connection = new signalR.HubConnectionBuilder()
                 .withUrl('/hubs/game', { accessTokenFactory: () => jwtToken })
                 .withAutomaticReconnect()
@@ -279,25 +317,46 @@
             connection.start().then(() => {
                 document.getElementById('signalr-status').innerText = 'SignalR Connected ✅';
                 document.getElementById('signalr-status').className = 'badge badge-green';
-            }).catch(err => console.error('SignalR Connection Error:', err));
+            }).catch(err => {
+                console.error('SignalR Connection Error:', err);
+                document.getElementById('signalr-status').innerText = 'SignalR Auth Failed';
+                document.getElementById('signalr-status').className = 'badge badge-red';
+            });
         }
 
         async function createRoom() {
-            const res = await fetch('/api/room/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + jwtToken
-                },
-                body: JSON.stringify({ modifiers: 0 })
-            });
-            const data = await res.json();
-            if (data.room_code) {
-                activeRoomCode = data.room_code;
-                isHost = true;
-                enterRoomView(activeRoomCode);
-            } else {
-                alert(data.error || 'Failed to create room.');
+            const btn = document.getElementById('btn-create-room');
+            btn.innerText = 'Creating Room...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/room/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + jwtToken
+                    },
+                    body: JSON.stringify({ modifiers: 0 })
+                });
+
+                if (res.status === 401) {
+                    alert('Session expired or server restarted. Please login again.');
+                    logout();
+                    return;
+                }
+
+                const data = await res.json();
+                if (res.ok && data.room_code) {
+                    activeRoomCode = data.room_code;
+                    enterRoomView(activeRoomCode);
+                } else {
+                    alert(data.error || 'Failed to create room.');
+                }
+            } catch (err) {
+                alert('Error creating room: ' + err.message);
+            } finally {
+                btn.innerText = 'Create New Room';
+                btn.disabled = false;
             }
         }
 
@@ -321,11 +380,17 @@
             }
         }
 
+        function leaveRoom() {
+            activeRoomCode = '';
+            document.getElementById('gameplay-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+        }
+
         function renderRoomState(state) {
             document.getElementById('game-phase-badge').innerText = `Phase: ${state.status}`;
             
             // Check host controls
-            const myPlayer = state.players.find(p => p.username.toLowerCase() === currentUser.toLowerCase());
+            const myPlayer = state.players.find(p => p.username && p.username.toLowerCase() === currentUser.toLowerCase());
             if (myPlayer && myPlayer.is_host && state.status === 'Lobby') {
                 document.getElementById('host-controls').style.display = 'block';
             } else {
@@ -349,7 +414,11 @@
 
         async function startGame() {
             if (!activeRoomCode || !connection) return;
-            await connection.invoke('StartGame', activeRoomCode);
+            try {
+                await connection.invoke('StartGame', activeRoomCode);
+            } catch (e) {
+                alert('Start Game error: ' + e.message);
+            }
         }
 
         function copyRoomCode() {
