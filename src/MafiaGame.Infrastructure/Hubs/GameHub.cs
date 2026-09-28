@@ -201,6 +201,23 @@ public class GameHub : Hub<IGameHubClient>
         }
     }
 
+    public async Task SendChatMessage(string roomCode, string message)
+    {
+        var userId = GetUserIdFromClaims();
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null || string.IsNullOrWhiteSpace(message)) return;
+
+        await Clients.Group(roomCode.ToUpper()).ReceiveChatMessage(user.Username, message.Trim());
+    }
+
+    public async Task CastVote(string roomCode, string targetUserIdStr)
+    {
+        if (Guid.TryParse(targetUserIdStr, out var targetId))
+        {
+            await BroadcastVoteTrail(roomCode, targetId);
+        }
+    }
+
     private async Task BroadcastRoomState(string roomCode)
     {
         var room = await _dbContext.GameRooms

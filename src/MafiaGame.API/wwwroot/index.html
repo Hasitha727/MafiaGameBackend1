@@ -23,13 +23,13 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg-dark); color: #F1F5F9; min-height: 100vh; padding: 16px; display: flex; justify-content: center; }
 
-        .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 16px; }
+        .container { width: 100%; max-width: 950px; display: flex; flex-direction: column; gap: 16px; }
 
         header { text-align: center; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(10px); }
         h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; background: linear-gradient(135deg, #FFF, var(--neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 
         input { width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: #FFF; outline: none; }
         button { width: 100%; padding: 12px; background: linear-gradient(135deg, #2563EB, #7C3AED); border: none; border-radius: 8px; color: #FFF; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.1s, filter 0.2s; }
@@ -39,13 +39,14 @@
         .btn-green { background: linear-gradient(135deg, #059669, #10B981); }
         .btn-amber { background: linear-gradient(135deg, #D97706, #F59E0B); }
         .btn-red { background: linear-gradient(135deg, #DC2626, #EF4444); }
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.8rem; }
 
-        .vote-trail { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 10px; padding: 12px; max-height: 180px; overflow-y: auto; font-size: 0.9rem; display: flex; flex-direction: column; gap: 6px; }
+        .vote-trail { background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; padding: 12px; height: 260px; overflow-y: auto; font-size: 0.9rem; display: flex; flex-direction: column; gap: 8px; }
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; background: rgba(0, 240, 255, 0.15); color: var(--neon-cyan); font-weight: 700; border: 1px solid var(--neon-cyan); }
         .badge-red { background: rgba(255, 0, 85, 0.15); color: var(--neon-red); border-color: var(--neon-red); }
         .badge-green { background: rgba(0, 255, 157, 0.15); color: var(--neon-green); border-color: var(--neon-green); }
 
-        .player-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .player-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
         .player-card.eliminated { opacity: 0.5; filter: grayscale(1); }
 
         .role-box { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0, 240, 255, 0.15)); border: 1px solid var(--neon-purple); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
@@ -118,8 +119,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                 <div>
                     <span style="font-size: 1.2rem; font-family: 'Outfit'; font-weight: 800;">ROOM: <span id="current-room-code" style="color: var(--neon-cyan);">------</span></span>
-                    <button style="width: auto; padding: 4px 10px; font-size: 0.75rem; display: inline-block; margin-left: 8px;" onclick="copyRoomCode()">Copy Code</button>
-                    <button style="width: auto; padding: 4px 10px; font-size: 0.75rem; display: inline-block; margin-left: 4px; background: rgba(255,255,255,0.1);" onclick="leaveRoom()">Leave Room</button>
+                    <button class="btn-sm" onclick="copyRoomCode()">Copy Code</button>
+                    <button class="btn-sm" style="background: rgba(255,255,255,0.1);" onclick="leaveRoom()">Leave Room</button>
                 </div>
                 <div>
                     <span class="badge" id="game-phase-badge">Phase: Lobby</span>
@@ -127,10 +128,10 @@
                 </div>
             </div>
 
-            <!-- Secret Identity Box (Appears when game starts) -->
+            <!-- Secret Identity Box -->
             <div id="role-box" class="role-box" style="display: none;">
-                <h3 style="font-family: 'Outfit'; color: var(--neon-cyan);" id="role-title">SECRET ROLE: CIVILIAN 🧑</h3>
-                <p id="role-desc" style="color: #CBD5E1; font-size: 0.9rem; margin-top: 4px;">Survive the night and vote out the Mafia during the Day phase!</p>
+                <h3 style="font-family: 'Outfit'; color: var(--neon-cyan);" id="role-title">SECRET ROLE ASSIGNED</h3>
+                <p id="role-desc" style="color: #CBD5E1; font-size: 0.9rem; margin-top: 4px;">Survive and fulfill your role objective to win!</p>
             </div>
 
             <!-- Host Controls -->
@@ -140,19 +141,25 @@
 
             <!-- Game Arena Grid -->
             <div class="grid">
-                <!-- Connected Players Roster -->
+                <!-- Connected Players Roster & Action Buttons -->
                 <div>
-                    <h4 style="margin-bottom: 10px;">Players Roster</h4>
+                    <h4 style="margin-bottom: 10px;">Players Roster & Target Voting</h4>
                     <div id="players-roster" style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="color: #64748B; font-size: 0.85rem;">Waiting for players to join...</div>
                     </div>
                 </div>
 
-                <!-- SignalR Announcement & Vote Trail Stream -->
+                <!-- Live Chat & Announcement Stream -->
                 <div>
-                    <h4 style="margin-bottom: 10px;">Game Live Stream</h4>
+                    <h4 style="margin-bottom: 10px;">Town Discussion & Live Stream</h4>
                     <div id="vote-trail-box" class="vote-trail">
-                        <div style="color: #64748B;">Room initialized. Waiting for actions...</div>
+                        <div style="color: #64748B;">Room initialized. Waiting for town discussion...</div>
+                    </div>
+
+                    <!-- Live Discussion Chat Input -->
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input type="text" id="chat-input" placeholder="Accuse, defend or discuss..." style="margin: 0;" onkeydown="if(event.key==='Enter') sendChat()">
+                        <button class="btn-green" style="width: 90px; padding: 12px 6px;" onclick="sendChat()">Send</button>
                     </div>
                 </div>
             </div>
@@ -162,7 +169,7 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="font-family: 'Outfit';">🏆 Global Leaderboard</h3>
-                <button style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="fetchLeaderboard()">Refresh</button>
+                <button class="btn-sm" onclick="fetchLeaderboard()">Refresh</button>
             </div>
             <table>
                 <thead>
@@ -185,6 +192,8 @@
         let jwtToken = localStorage.getItem('jwt_token') || '';
         let currentUser = localStorage.getItem('current_username') || '';
         let activeRoomCode = '';
+        let currentRole = '';
+        let currentPhase = 'Lobby';
         let connection = null;
 
         if (jwtToken && currentUser) {
@@ -292,7 +301,7 @@
 
             connection.on('ReceiveVoteTrail', (voterId, voterName, targetId, targetName, count) => {
                 const box = document.getElementById('vote-trail-box');
-                box.innerHTML += `<div>🗳️ <strong>${voterName}</strong> voted for <strong>${targetName}</strong></div>`;
+                box.innerHTML += `<div>🗳️ <strong>${voterName}</strong> cast vote for <strong>${targetName}</strong></div>`;
                 box.scrollTop = box.scrollHeight;
             });
 
@@ -302,9 +311,16 @@
                 box.scrollTop = box.scrollHeight;
 
                 if (title === "SECRET IDENTITY REVEALED") {
+                    currentRole = message;
                     document.getElementById('role-box').style.display = 'block';
                     document.getElementById('role-title').innerText = message;
                 }
+            });
+
+            connection.on('ReceiveChatMessage', (senderName, message) => {
+                const box = document.getElementById('vote-trail-box');
+                box.innerHTML += `<div>💬 <strong style="color: var(--neon-amber);">${senderName}:</strong> ${message}</div>`;
+                box.scrollTop = box.scrollHeight;
             });
 
             connection.on('PlayerStatusChanged', (userId, username, isConnected) => {
@@ -387,6 +403,7 @@
         }
 
         function renderRoomState(state) {
+            currentPhase = state.status;
             document.getElementById('game-phase-badge').innerText = `Phase: ${state.status}`;
             
             // Check host controls
@@ -397,19 +414,70 @@
                 document.getElementById('host-controls').style.display = 'none';
             }
 
-            // Render roster
+            // Render roster with Vote & Action Buttons
             const roster = document.getElementById('players-roster');
-            roster.innerHTML = state.players.map(p => `
-                <div class="player-card ${p.is_alive ? '' : 'eliminated'}">
-                    <div>
-                        <strong>${p.username}</strong> ${p.is_host ? '👑 (Host)' : ''}
-                        <div style="font-size: 0.75rem; color: #94A3B8;">${p.is_alive ? 'Alive 💚' : 'Eliminated 💀'}</div>
+            roster.innerHTML = state.players.map(p => {
+                const isMe = p.username && p.username.toLowerCase() === currentUser.toLowerCase();
+                let actionBtnHtml = '';
+
+                if (!isMe && p.is_alive) {
+                    if (state.status === 'Day') {
+                        actionBtnHtml = `<button class="btn-sm btn-amber" onclick="castVote('${p.user_id}', '${p.username}')">🗳️ Vote</button>`;
+                    } else if (state.status === 'Night') {
+                        actionBtnHtml = `<button class="btn-sm btn-red" onclick="castNightAction('${p.user_id}', '${p.username}')">🎯 Target</button>`;
+                    }
+                }
+
+                return `
+                    <div class="player-card ${p.is_alive ? '' : 'eliminated'}">
+                        <div>
+                            <strong>${p.username}</strong> ${p.is_host ? '👑 (Host)' : ''} ${isMe ? '👤 (You)' : ''}
+                            <div style="font-size: 0.75rem; color: #94A3B8;">${p.is_alive ? 'Alive 💚' : 'Eliminated 💀'}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            ${actionBtnHtml}
+                            ${p.is_connected ? '<span class="badge badge-green">Online</span>' : '<span class="badge badge-red">Offline</span>'}
+                        </div>
                     </div>
-                    <div>
-                        ${p.is_connected ? '<span class="badge badge-green">Online</span>' : '<span class="badge badge-red">Offline</span>'}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        async function castVote(targetUserId, targetUsername) {
+            if (!activeRoomCode || !connection) return;
+            try {
+                await connection.invoke('CastVote', activeRoomCode, targetUserId);
+                const box = document.getElementById('vote-trail-box');
+                box.innerHTML += `<div>🗳️ <strong style="color: var(--neon-cyan);">You voted to execute ${targetUsername}</strong></div>`;
+                box.scrollTop = box.scrollHeight;
+            } catch (e) {
+                console.error('Vote error:', e);
+            }
+        }
+
+        async function castNightAction(targetUserId, targetUsername) {
+            if (!activeRoomCode || !connection) return;
+            try {
+                await connection.invoke('CastVote', activeRoomCode, targetUserId);
+                const box = document.getElementById('vote-trail-box');
+                box.innerHTML += `<div>🎯 <strong style="color: var(--neon-red);">Target action submitted on ${targetUsername}</strong></div>`;
+                box.scrollTop = box.scrollHeight;
+            } catch (e) {
+                console.error('Night action error:', e);
+            }
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg || !activeRoomCode || !connection) return;
+
+            try {
+                await connection.invoke('SendChatMessage', activeRoomCode, msg);
+                input.value = '';
+            } catch (e) {
+                console.error('Send chat error:', e);
+            }
         }
 
         async function startGame() {
