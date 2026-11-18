@@ -1,5 +1,8 @@
 namespace MafiaGame.Tests;
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using MafiaGame.Domain.Entities;
 using MafiaGame.Domain.Enums;
@@ -67,5 +70,29 @@ public class GameLogicTests
 
         // Assert
         Assert.False(isExpiredExecuted);
+    }
+
+    [Fact]
+    public void JwtService_Includes_RoleClaim_For_RBAC()
+    {
+        // Arrange
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Key"] = "UNIT_TEST_SECRET_KEY_FOR_RBAC_VERIFICATION_123456789",
+                ["Jwt:Issuer"] = "MafiaGameBackend"
+            })
+            .Build();
+        var jwtService = new JwtService(config);
+        var user = new User { Username = "AdminUser", Email = "admin@test.com", Role = "Admin" };
+
+        // Act
+        var tokenStr = jwtService.GenerateToken(user);
+        var token = new JwtSecurityTokenHandler().ReadJwtToken(tokenStr);
+        var roleClaim = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+
+        // Assert
+        Assert.NotNull(roleClaim);
+        Assert.Equal("Admin", roleClaim.Value);
     }
 }

@@ -1,28 +1,24 @@
 namespace MafiaGame.API.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MafiaGame.Application.DTOs;
-using MafiaGame.Infrastructure.Persistence;
+using MafiaGame.Application.Interfaces;
 
 [ApiController]
 [Route("api/[controller]")]
 public class LeaderboardController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public LeaderboardController(ApplicationDbContext db)
+    public LeaderboardController(IUnitOfWork unitOfWork)
     {
-        _db = db;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetLeaderboard([FromQuery] int top = 20)
     {
-        var statsList = await _db.PlayerGameStats
-            .Include(s => s.User)
-            .Take(top)
-            .ToListAsync();
+        var statsList = await _unitOfWork.Leaderboard.GetTopWithUsersAsync(top);
 
         var leaderboard = statsList
             .Select(s => new LeaderboardDto(

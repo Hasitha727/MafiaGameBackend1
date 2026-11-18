@@ -83,10 +83,12 @@ public class GameLoopBackgroundService : BackgroundService
         await db.SaveChangesAsync();
 
         await _hubContext.Clients.Group(room.RoomCode).ReceiveGameAnnouncement(
-            "🌅 MIDNIGHT EXECUTION",
+            "🌙 NIGHT FALLS",
             $"The town has spoken! Night falls on Day {room.CurrentDay}. Special roles, perform your actions!",
             "Night"
         );
+
+        await BroadcastRoomStateAsync(room);
     }
 
     private async Task ResolveNightPhaseAndAdvanceAsync(ApplicationDbContext db, GameRoom room)
@@ -102,5 +104,29 @@ public class GameLoopBackgroundService : BackgroundService
             $"Sunrise arrives on Day {room.CurrentDay}. Town discussion phase initiated!",
             "Day"
         );
+
+        await BroadcastRoomStateAsync(room);
+    }
+
+    private async Task BroadcastRoomStateAsync(GameRoom room)
+    {
+        var state = new
+        {
+            room_code = room.RoomCode,
+            status = room.Status.ToString(),
+            current_day = room.CurrentDay,
+            phase_end_time = room.PhaseEndTime,
+            modifiers = room.Modifiers.ToString(),
+            players = room.Players.Select(p => new
+            {
+                user_id = p.UserId,
+                username = p.User.Username,
+                is_alive = p.IsAlive,
+                is_host = p.IsHost,
+                is_connected = p.IsConnected
+            })
+        };
+
+        await _hubContext.Clients.Group(room.RoomCode).ReceiveRoomState(state);
     }
 }

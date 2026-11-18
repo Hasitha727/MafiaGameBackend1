@@ -3,30 +3,29 @@ namespace MafiaGame.API.Controllers;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MafiaGame.Application.DTOs;
+using MafiaGame.Application.Interfaces;
 using MafiaGame.Domain.Entities;
 using MafiaGame.Domain.Enums;
-using MafiaGame.Infrastructure.Persistence;
 
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
 public class RoomController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RoomController(ApplicationDbContext db)
+    public RoomController(IUnitOfWork unitOfWork)
     {
-        _db = db;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateRoom([FromBody] CreateRoomDto dto)
     {
         var userId = GetUserId();
-        var user = await _db.Users.FindAsync(userId);
-        if (user == null) return Unauthorized();
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        if (user == null) return Unauthorized(new { error = "User session not found. Please log in again." });
 
         var roomCode = GenerateUniqueRoomCode();
 
@@ -47,9 +46,9 @@ public class RoomController : ControllerBase
             IsConnected = true
         };
 
-        _db.GameRooms.Add(room);
-        _db.RoomPlayers.Add(hostPlayer);
-        await _db.SaveChangesAsync();
+        await _unitOfWork.Rooms.AddAsync(room);
+        await _unitOfWork.Rooms.AddPlayerAsync(hostPlayer);
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(new
         {
@@ -64,11 +63,7 @@ public class RoomController : ControllerBase
     [HttpGet("{code}")]
     public async Task<IActionResult> GetRoomDetails(string code)
     {
-        var room = await _db.GameRooms
-            .Include(r => r.Players)
-            .ThenInclude(p => p.User)
-            .FirstOrDefaultAsync(r => r.RoomCode == code.ToUpper());
-
+        var room = await _unitOfWork.Rooms.GetByCodeWithPlayersAsync(code);
         if (room == null) return NotFound(new { error = "Room not found." });
 
         return Ok(new
@@ -77,6 +72,7 @@ public class RoomController : ControllerBase
             room_code = room.RoomCode,
             status = room.Status.ToString(),
             current_day = room.CurrentDay,
+            phase_end_time = room.PhaseEndTime,
             winner_team = room.WinnerTeam,
             modifiers = room.Modifiers.ToString(),
             players = room.Players.Select(p => new

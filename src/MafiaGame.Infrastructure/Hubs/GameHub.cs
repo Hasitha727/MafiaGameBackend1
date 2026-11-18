@@ -114,6 +114,22 @@ public class GameHub : Hub<IGameHubClient>
                 await _dbContext.SaveChangesAsync();
             }
         }
+        else if (existingPlayer != null)
+        {
+            existingPlayer.SignalRConnectionId = Context.ConnectionId;
+            existingPlayer.IsConnected = true;
+            existingPlayer.DisconnectedAt = null;
+            await _dbContext.SaveChangesAsync();
+
+            if (room.Status != GamePhase.Lobby && room.Status != GamePhase.Ended)
+            {
+                await Clients.Caller.ReceiveGameAnnouncement(
+                    "SECRET IDENTITY REVEALED",
+                    $"Your secret role is: [{existingPlayer.Role.ToString().ToUpper()}]",
+                    "Reveal"
+                );
+            }
+        }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomCode.ToUpper());
         await BroadcastRoomState(roomCode.ToUpper());
@@ -130,7 +146,15 @@ public class GameHub : Hub<IGameHubClient>
         if (room == null || room.HostUserId != userId || room.Status != GamePhase.Lobby) return;
 
         var players = room.Players.ToList();
-        if (players.Count < 3) return;
+        if (players.Count < 3)
+        {
+            await Clients.Caller.ReceiveGameAnnouncement(
+                "NOT ENOUGH PLAYERS",
+                $"At least 3 players are required to start (currently {players.Count}). Share the room code!",
+                "Lobby"
+            );
+            return;
+        }
 
         // Role assignment logic
         var roles = AssignRolesForCount(players.Count);

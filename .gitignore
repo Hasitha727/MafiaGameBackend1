@@ -1,0 +1,19 @@
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+*.db
+*.db-shm
+*.db-wal
+
+# Node / React frontend
+client/node_modules/
+client/dist/
+.env
+.env.local
+
+# IDE
+.vs/
+.vscode/
+.idea/

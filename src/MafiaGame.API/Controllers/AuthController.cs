@@ -1,22 +1,20 @@
 namespace MafiaGame.API.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MafiaGame.Application.DTOs;
 using MafiaGame.Application.Interfaces;
 using MafiaGame.Domain.Entities;
-using MafiaGame.Infrastructure.Persistence;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IJwtService _jwtService;
 
-    public AuthController(ApplicationDbContext db, IJwtService jwtService)
+    public AuthController(IUnitOfWork unitOfWork, IJwtService jwtService)
     {
-        _db = db;
+        _unitOfWork = unitOfWork;
         _jwtService = jwtService;
     }
 
@@ -28,16 +26,21 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = "Username, Email, and Password are required." });
         }
 
-        if (await _db.Users.AnyAsync(u => u.Username == dto.Username || u.Email == dto.Email))
+        if (await _unitOfWork.Users.ExistsByUsernameOrEmailAsync(dto.Username, dto.Email))
         {
             return BadRequest(new { error = "Username or Email is already taken." });
         }
 
+        // First registered user becomes Admin for RBAC management; subsequent users default to Player
+        var isFirstUser = await _unitOfWork.Users.CountAsync() == 0;
+        var assignedRole = isFirstUser ? "Admin" : "Player";
+
         var user = new User
         {
-            Username = dto.Username,
-            Email = dto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            Username = dto.Username.Trim(),
+            Email = dto.Email.Trim(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            Role = assignedRole
         };
 
         var stats = new PlayerGameStats
@@ -46,24 +49,24 @@ public class AuthController : ControllerBase
             User = user
         };
 
-        _db.Users.Add(user);
-        _db.PlayerGameStats.Add(stats);
-        await _db.SaveChangesAsync();
+        await _unitOfWork.Users.AddAsync(user);
+        await _unitOfWork.Leaderboard.AddAsync(stats);
+        await _unitOfWork.SaveChangesAsync();
 
         var token = _jwtService.GenerateToken(user);
-        return Ok(new AuthResponseDto(user.Id, user.Username, user.Email, token));
+        return Ok(new AuthResponseDto(user.Id, user.Username, user.Email, user.Role, token));
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == dto.UsernameOrEmail || u.Email == dto.UsernameOrEmail);
+        var user = await _unitOfWork.Users.GetByUsernameOrEmailAsync(dto.UsernameOrEmail);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
             return Unauthorized(new { error = "Invalid credentials." });
         }
 
         var token = _jwtService.GenerateToken(user);
-        return Ok(new AuthResponseDto(user.Id, user.Username, user.Email, token));
+        return Ok(new AuthResponseDto(user.Id, user.Username, user.Email, user.Role, token));
     }
 }

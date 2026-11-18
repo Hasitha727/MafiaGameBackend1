@@ -4,7 +4,7 @@ public record RegisterDto(string Username, string Email, string Password);
 
 public record LoginDto(string UsernameOrEmail, string Password);
 
-public record AuthResponseDto(Guid UserId, string Username, string Email, string Token);
+public record AuthResponseDto(Guid UserId, string Username, string Email, string Role, string Token);
 
 public record CreateRoomDto(int Modifiers = 0);
 

@@ -1,0 +1,339 @@
+:root {
+  --app-bg: #070B14;
+  --surface: rgba(17, 24, 39, 0.88);
+  --surface-elevated: rgba(30, 41, 59, 0.72);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --neon-cyan: #00F0FF;
+  --neon-purple: #A855F7;
+  --neon-amber: #F59E0B;
+  --neon-red: #F43F5E;
+  --neon-green: #10B981;
+  --nav-height: 68px;
+  --header-height: 60px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top center, #111b33 0%, var(--app-bg) 55%);
+  color: #F8FAFC;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+.font-display {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Mobile-First Native App Shell */
+.app-shell {
+  width: 100%;
+  max-width: 540px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: rgba(7, 11, 20, 0.65);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.65);
+}
+
+@media (min-width: 541px) {
+  .app-shell {
+    border-left: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+  }
+}
+
+/* Fixed Top App Bar */
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  padding: 0 16px;
+  background: rgba(10, 14, 23, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.app-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+}
+
+.app-brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.6px;
+  background: linear-gradient(135deg, #FFFFFF 20%, var(--neon-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Main Scrollable Content Area */
+.app-content {
+  flex: 1;
+  padding: 16px 16px calc(var(--nav-height) + 24px);
+  overflow-y: auto;
+}
+
+.app-content.no-nav {
+  padding-bottom: 28px;
+}
+
+/* Fixed Bottom Native Tab Bar */
+.app-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 540px;
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(10, 14, 23, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: #64748B;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 4px;
+  transition: color 0.18s ease, transform 0.15s ease;
+}
+
+.nav-tab .tab-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.nav-tab.active {
+  color: var(--neon-cyan);
+}
+
+.nav-tab.active .tab-icon {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.55));
+}
+
+/* Glass Game Cards */
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 18px;
+  backdrop-filter: blur(10px);
+}
+
+.game-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #FFF !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  font-size: 0.95rem !important;
+}
+
+.game-input:focus {
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15) !important;
+}
+
+.btn-game-primary {
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  border: none;
+  color: #FFF;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 13px 16px;
+  letter-spacing: 0.5px;
+  transition: transform 0.12s ease, filter 0.15s ease;
+}
+
+.btn-game-primary:hover, .btn-game-primary:focus {
+  color: #FFF;
+  filter: brightness(1.1);
+}
+
+.btn-game-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-game-green {
+  background: linear-gradient(135deg, #059669, #10B981);
+  border: none;
+  color: #FFF;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 13px 16px;
+}
+
+.btn-game-green:hover { color: #FFF; filter: brightness(1.08); }
+
+.btn-game-amber {
+  background: linear-gradient(135deg, #D97706, #F59E0B);
+  border: none;
+  color: #0A0E17;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 13px 16px;
+}
+
+.btn-game-amber:hover { color: #0A0E17; filter: brightness(1.08); }
+
+/* Phase Banners */
+.phase-banner {
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+}
+
+.phase-lobby {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(124, 58, 237, 0.22));
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
+.phase-night {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.45));
+  border-color: rgba(168, 85, 247, 0.55);
+}
+
+.phase-day {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.28), rgba(245, 158, 11, 0.18));
+  border-color: rgba(245, 158, 11, 0.55);
+}
+
+/* Secret Role Reveal Card */
+.secret-role-card {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 240, 255, 0.15));
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.12);
+}
+
+/* Player Roster Item */
+.player-tile {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-tile.dead {
+  opacity: 0.48;
+  filter: grayscale(1);
+}
+
+/* Chat Stream */
+.chat-stream {
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px;
+  height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-bubble {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  max-width: 92%;
+  word-break: break-word;
+}
+
+.chat-bubble.system {
+  background: rgba(0, 240, 255, 0.1);
+  border-left: 3px solid var(--neon-cyan);
+  color: #E0F2FE;
+  max-width: 100%;
+}
+
+.chat-bubble.vote {
+  background: rgba(245, 158, 11, 0.12);
+  border-left: 3px solid var(--neon-amber);
+  color: #FEF3C7;
+  max-width: 100%;
+}
+
+.chat-bubble.msg {
+  background: rgba(255, 255, 255, 0.06);
+  align-self: flex-start;
+}
+
+.chat-bubble.msg.mine {
+  background: rgba(37, 99, 235, 0.32);
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  align-self: flex-end;
+}
+
+.install-pill {
+  background: rgba(0, 240, 255, 0.14);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.install-pill:hover {
+  background: rgba(0, 240, 255, 0.25);
+}
+
+.room-code-display {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--neon-cyan);
+}

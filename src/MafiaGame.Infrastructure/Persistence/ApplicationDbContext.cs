@@ -25,6 +25,7 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Username).HasMaxLength(50).IsRequired();
             entity.Property(u => u.Email).HasMaxLength(100).IsRequired();
+            entity.Property(u => u.Role).HasMaxLength(20).HasDefaultValue("Player").IsRequired();
             entity.HasIndex(u => u.Username).IsUnique();
         });
 
