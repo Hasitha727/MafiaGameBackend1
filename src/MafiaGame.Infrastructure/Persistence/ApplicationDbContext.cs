@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.Username).HasMaxLength(50).IsRequired();
             entity.Property(u => u.Email).HasMaxLength(100).IsRequired();
             entity.Property(u => u.Role).HasMaxLength(20).HasDefaultValue("Player").IsRequired();
+            entity.Property(u => u.IsBot).HasDefaultValue(false);
             entity.HasIndex(u => u.Username).IsUnique();
         });
 
@@ -44,6 +45,7 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(r => r.Id);
             entity.Property(r => r.RoomCode).HasMaxLength(6).IsRequired();
+            entity.Property(r => r.ChatLanguage).HasMaxLength(20).HasDefaultValue("Singlish");
             entity.HasIndex(r => r.RoomCode).IsUnique();
         });
 

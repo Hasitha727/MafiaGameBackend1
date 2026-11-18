@@ -95,4 +95,53 @@ public class GameLogicTests
         Assert.NotNull(roleClaim);
         Assert.Equal("Admin", roleClaim.Value);
     }
+
+    [Fact]
+    public void GameStateManager_DoctorSave_Blocks_MafiaKill()
+    {
+        // Arrange
+        var manager = new GameStateManager();
+        var mafia = new RoomPlayer { UserId = Guid.NewGuid(), Role = RoleType.Mafia, IsAlive = true, User = new User { Username = "MafiaBot" } };
+        var doctor = new RoomPlayer { UserId = Guid.NewGuid(), Role = RoleType.Doctor, IsAlive = true, User = new User { Username = "DocBot" } };
+        var civilian = new RoomPlayer { UserId = Guid.NewGuid(), Role = RoleType.Civilian, IsAlive = true, User = new User { Username = "CivPlayer" } };
+        var players = new[] { mafia, doctor, civilian };
+
+        // Act
+        manager.RecordNightAction("TEST01", mafia.UserId, civilian.UserId);
+        manager.RecordNightAction("TEST01", doctor.UserId, civilian.UserId);
+        var result = manager.ResolveNightActions("TEST01", players);
+
+        // Assert
+        Assert.True(result.SavedByDoctor);
+        Assert.Empty(result.KilledUserIds);
+    }
+
+    [Fact]
+    public void GameStateManager_Resolves_DayMajority_And_Detects_Tie()
+    {
+        // Arrange
+        var manager = new GameStateManager();
+        var p1 = new RoomPlayer { UserId = Guid.NewGuid(), IsAlive = true, User = new User { Username = "P1" } };
+        var p2 = new RoomPlayer { UserId = Guid.NewGuid(), IsAlive = true, User = new User { Username = "P2" } };
+        var p3 = new RoomPlayer { UserId = Guid.NewGuid(), IsAlive = true, User = new User { Username = "P3" } };
+        var players = new[] { p1, p2, p3 };
+
+        // Majority vote on P3
+        manager.RecordDayVote("TEST02", p1.UserId, p3.UserId, players);
+        manager.RecordDayVote("TEST02", p2.UserId, p3.UserId, players);
+        var majorityRes = manager.ResolveDayVotes("TEST02");
+
+        Assert.Equal(p3.UserId, majorityRes.ExecutedUserId);
+        Assert.Equal(2, majorityRes.TopVotes);
+        Assert.False(majorityRes.IsTie);
+
+        // Tie vote between P2 and P3
+        manager.ResetRoom("TEST03");
+        manager.RecordDayVote("TEST03", p1.UserId, p2.UserId, players);
+        manager.RecordDayVote("TEST03", p2.UserId, p3.UserId, players);
+        var tieRes = manager.ResolveDayVotes("TEST03");
+
+        Assert.Null(tieRes.ExecutedUserId);
+        Assert.True(tieRes.IsTie);
+    }
 }

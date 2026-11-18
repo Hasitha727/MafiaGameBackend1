@@ -6,7 +6,7 @@ public record LoginDto(string UsernameOrEmail, string Password);
 
 public record AuthResponseDto(Guid UserId, string Username, string Email, string Role, string Token);
 
-public record CreateRoomDto(int Modifiers = 0);
+public record CreateRoomDto(int Modifiers = 0, string ChatLanguage = "Singlish");
 
 public record LeaderboardDto(
     Guid UserId, 

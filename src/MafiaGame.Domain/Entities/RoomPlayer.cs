@@ -10,6 +10,8 @@ public class RoomPlayer
     public RoleType Role { get; set; } = RoleType.Civilian;
     public bool IsAlive { get; set; } = true;
     public bool IsHost { get; set; } = false;
+    public bool IsBot { get; set; } = false;
+    public string BotPersonality { get; set; } = string.Empty;
     public bool IsConnected { get; set; } = true;
     public string? SignalRConnectionId { get; set; }
     public DateTime? DisconnectedAt { get; set; }

@@ -36,6 +36,7 @@ else
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddSingleton<IGracePeriodManager, GracePeriodManager>();
+builder.Services.AddSingleton<IGameStateManager, GameStateManager>();
 builder.Services.AddHostedService<GameLoopBackgroundService>();
 
 // JWT Authentication & RBAC Configuration

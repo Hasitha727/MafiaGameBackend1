@@ -12,6 +12,7 @@ public class LeaderboardRepository : Repository<PlayerGameStats>, ILeaderboardRe
     public async Task<IReadOnlyList<PlayerGameStats>> GetTopWithUsersAsync(int top) =>
         await _context.PlayerGameStats
             .Include(s => s.User)
+            .Where(s => !s.User.IsBot)
             .Take(top)
             .ToListAsync();
 }

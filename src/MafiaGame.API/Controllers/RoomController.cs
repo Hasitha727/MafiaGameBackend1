@@ -14,10 +14,12 @@ using MafiaGame.Domain.Enums;
 public class RoomController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IGameStateManager _gameState;
 
-    public RoomController(IUnitOfWork unitOfWork)
+    public RoomController(IUnitOfWork unitOfWork, IGameStateManager gameState)
     {
         _unitOfWork = unitOfWork;
+        _gameState = gameState;
     }
 
     [HttpPost("create")]
@@ -28,12 +30,14 @@ public class RoomController : ControllerBase
         if (user == null) return Unauthorized(new { error = "User session not found. Please log in again." });
 
         var roomCode = GenerateUniqueRoomCode();
+        var language = dto.ChatLanguage.Equals("English", StringComparison.OrdinalIgnoreCase) ? "English" : "Singlish";
 
         var room = new GameRoom
         {
             RoomCode = roomCode,
             HostUserId = userId,
             Status = GamePhase.Lobby,
+            ChatLanguage = language,
             Modifiers = (RoomModifier)dto.Modifiers
         };
 
@@ -42,6 +46,7 @@ public class RoomController : ControllerBase
             RoomId = room.Id,
             UserId = userId,
             IsHost = true,
+            IsBot = false,
             IsAlive = true,
             IsConnected = true
         };
@@ -56,6 +61,7 @@ public class RoomController : ControllerBase
             room_code = room.RoomCode,
             host_username = user.Username,
             status = room.Status.ToString(),
+            chat_language = room.ChatLanguage,
             modifiers = room.Modifiers.ToString()
         });
     }
@@ -66,6 +72,11 @@ public class RoomController : ControllerBase
         var room = await _unitOfWork.Rooms.GetByCodeWithPlayersAsync(code);
         if (room == null) return NotFound(new { error = "Room not found." });
 
+        var voteCounts = _gameState.GetDayVoteCounts(room.RoomCode)
+            .ToDictionary(kv => kv.Key.ToString(), kv => kv.Value);
+        var skipVotes = _gameState.GetSkipVoteCount(room.RoomCode);
+        bool revealRoles = room.Status == GamePhase.Ended;
+
         return Ok(new
         {
             room_id = room.Id,
@@ -74,14 +85,20 @@ public class RoomController : ControllerBase
             current_day = room.CurrentDay,
             phase_end_time = room.PhaseEndTime,
             winner_team = room.WinnerTeam,
+            chat_language = room.ChatLanguage,
             modifiers = room.Modifiers.ToString(),
+            vote_counts = voteCounts,
+            skip_votes = skipVotes,
             players = room.Players.Select(p => new
             {
                 user_id = p.UserId,
                 username = p.User.Username,
                 is_host = p.IsHost,
+                is_bot = p.IsBot,
+                bot_personality = p.BotPersonality,
                 is_alive = p.IsAlive,
-                is_connected = p.IsConnected
+                is_connected = p.IsConnected,
+                role = revealRoles ? p.Role.ToString() : null
             })
         });
     }

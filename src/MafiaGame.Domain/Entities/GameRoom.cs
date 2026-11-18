@@ -11,6 +11,7 @@ public class GameRoom
     public int CurrentDay { get; set; } = 1;
     public DateTime? PhaseEndTime { get; set; }
     public string WinnerTeam { get; set; } = string.Empty;
+    public string ChatLanguage { get; set; } = "Singlish";
     public RoomModifier Modifiers { get; set; } = RoomModifier.None;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

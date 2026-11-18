@@ -17,11 +17,12 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task<bool> ExistsByUsernameOrEmailAsync(string username, string email) =>
         await _context.Users.AnyAsync(u => u.Username == username || u.Email == email);
 
-    public async Task<int> CountAsync() => await _context.Users.CountAsync();
+    public async Task<int> CountAsync() => await _context.Users.CountAsync(u => !u.IsBot);
 
     public async Task<IReadOnlyList<User>> GetAllWithStatsAsync() =>
         await _context.Users
             .Include(u => u.Stats)
+            .Where(u => !u.IsBot)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 }

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function HomePage() {
   const [roomCode, setRoomCode] = useState('');
+  const [chatLanguage, setChatLanguage] = useState('Singlish');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const { user, canInstall, promptInstall } = useAuth();
@@ -14,7 +15,7 @@ export default function HomePage() {
     setError('');
     setCreating(true);
     try {
-      const { data } = await api.post('/room/create', { modifiers: 0 });
+      const { data } = await api.post('/room/create', { modifiers: 0, chatLanguage });
       if (data.room_code) {
         navigate(`/room/${data.room_code}`);
       }
@@ -75,11 +76,40 @@ export default function HomePage() {
       <div className="game-card">
         <div className="d-flex align-items-center gap-2 mb-2">
           <span style={{ fontSize: '1.35rem' }}>🎮</span>
-          <h5 className="font-display fw-bold mb-0">Host a New Match</h5>
+          <h5 className="font-display fw-bold mb-0">Host a Match (Friends or AI Bots)</h5>
         </div>
         <p className="text-secondary small mb-3">
-          Create a private lobby, invite friends with your 6-digit code, and launch the Mafia night cycle.
+          Play with friends or tap <strong>+ Add AI Bot</strong> inside the lobby to play solo with smart Singlish/English AI bots!
         </p>
+
+        {/* Bot & Announcement Language Toggle */}
+        <div className="mb-3">
+          <div className="small text-secondary mb-1">Game & AI Bot Chat Language</div>
+          <div
+            className="d-flex p-1 rounded-3"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <button
+              type="button"
+              className={`btn btn-sm flex-fill rounded-3 fw-semibold py-2 ${
+                chatLanguage === 'Singlish' ? 'btn-game-primary' : 'text-secondary border-0'
+              }`}
+              onClick={() => setChatLanguage('Singlish')}
+            >
+              🇱🇰 Singlish
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm flex-fill rounded-3 fw-semibold py-2 ${
+                chatLanguage === 'English' ? 'btn-game-primary' : 'text-secondary border-0'
+              }`}
+              onClick={() => setChatLanguage('English')}
+            >
+              🇬🇧 English
+            </button>
+          </div>
+        </div>
+
         <button
           type="button"
           className="btn btn-game-primary w-100"
