@@ -1,9 +1,11 @@
 # Stage 1: Build ReactJS + Bootstrap + Installable PWA Frontend
-FROM node:22-alpine AS frontend-build
+FROM node:22-slim AS frontend-build
 WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci
-COPY client/ ./
+COPY client/package.json ./
+RUN npm install --no-audit --no-fund
+COPY client/index.html client/vite.config.js ./
+COPY client/public ./public
+COPY client/src ./src
 RUN npm run build
 
 # Stage 2: Build ASP.NET Core 10 Web API + SignalR Backend
